@@ -7,7 +7,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 data = pd.read_csv(
-    "oral_cancer_prediction_dataset.csv",
+    filepath_or_buffer="oral_cancer_prediction_dataset.csv",
     dtype={
         "Country": "category",
         "Gender": "category",
