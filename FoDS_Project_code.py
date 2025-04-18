@@ -78,11 +78,11 @@ def get_scores(model, X_train, y_train, X_test, y_test):
     print('Training set score: R2 score: {:.3f}, RMSE: {:.3f}'.format(r2_train, rmse_train))
     print('Test set score: R2 score: {:.3f}, RMSE: {:.3f}'.format(r2_test, rmse_test))
 
-lasso = Lasso(alpha=0.1)
-lasso.fit(X_train_scaled, y_train) 
+Lasso = Lasso(alpha=0.1)
+Lasso.fit(X_train_scaled, y_train) 
 # get scores
-get_scores(lasso, X_train_scaled, y_train, X_test_scaled, y_test)
-print(lasso.coef_)
+get_scores(Lasso, X_train_scaled, y_train, X_test_scaled, y_test)
+print(Lasso.coef_)
 
 
 
@@ -92,7 +92,7 @@ print(lasso.coef_)
 
 
 
-
+#regularisierung mit Lasso
 
 
 
