@@ -62,9 +62,7 @@ X_train, X_test, y_train, y_test = (
     np.array(y_test),
 )
 
-
-
-## feature selection with Lasso --> funktioniert nicht, nochmals nachfragen
+## feature selection with Lasso --> alles 0, weil kein feature wichtig ist
 def get_scores(model, X_train, y_train, X_test, y_test):
     y_pred_test = model.predict(X_test)
     y_pred_train = model.predict(X_train)
@@ -84,27 +82,12 @@ Lasso.fit(X_train_scaled, y_train)
 get_scores(Lasso, X_train_scaled, y_train, X_test_scaled, y_test)
 print(Lasso.coef_)
 
-
-
-
-#### evtl. müssen wir noch feature engineering with the interaction terms machen --> wird noch in nachgefragt, ob nötig für unsere research question
-
-
-
-
-#regularisierung mit Lasso
-
-
-
-
 ### optional sampling ###
 
 
 
-
-
-
 ########## Machine Learning Models #########
+#regularisierung mit Lasso
 ### Model 1 ###
 
 
