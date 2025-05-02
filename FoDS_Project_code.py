@@ -45,6 +45,7 @@ X = data_encoded.drop(["Oral Cancer (Diagnosis)"], axis=1)
 
 ##train and test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2025)
+X_train_unscaled = X_train
 
 ##standardization
 sc = StandardScaler()
@@ -84,6 +85,20 @@ print(Lasso.coef_)
 
 ### optional sampling ###
 
+### Data visualization ###
+plt.figure(figsize = (8,6))
+age_before = sns.histplot(data = X_train_unscaled, x = "Age", bins = 20)
+age_before.set_xlabel("Age")
+age_before.set_ylabel("Count")
+age_before.set_title("Age distribution before data preprocessing")
+plt.savefig("data_visualization/age_before_preprocessing.jpg")
+
+plt.figure(figsize = (8,6))
+age_after = sns.histplot(data = X_train_scaled, x = "Age", bins = 20)
+age_after.set_xlabel("Age")
+age_after.set_ylabel("Count")
+age_after.set_title("Age distribution after data preprocessing")
+plt.savefig("data_visualization/age_after_preprocessing.jpg")
 
 
 ########## Machine Learning Models #########
