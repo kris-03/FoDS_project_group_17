@@ -103,21 +103,21 @@ plt.savefig("data_visualization/age_after_preprocessing.jpg")
 
 ########## Machine Learning Models #########
 #regularisierung mit Lasso
-### Model 1 ###
+### Model 1: logistic regression ###
 
 
 
 
-### Model 2 ###
+### Model 2: decision tree ###
 
 
 
 
-### Model 3 ###
+### Model 3: random forest ###
 
 
 
 
-### Model 4 ###
+### Model 4: support vector machine ###
 
 
