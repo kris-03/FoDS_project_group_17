@@ -207,7 +207,7 @@ tn, fp, fn, tp = cm.ravel()
 specificity = tn / (tn + fp)
 
 # ROC AUC
-fp_rates, tp_rates, _ = roc_curve(y, y_test_predict_proba)
+fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
 roc_auc = auc(fp_rates, tp_rates)
 
 # Print the results
