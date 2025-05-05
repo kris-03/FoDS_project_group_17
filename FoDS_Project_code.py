@@ -2,6 +2,13 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from sklearn.model_selection import train_test_split, KFold
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    confusion_matrix, accuracy_score, precision_score, recall_score,
+    f1_score, roc_curve, auc)
+import os
+
 from sklearn.metrics import root_mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
@@ -105,6 +112,71 @@ plt.savefig("data_visualization/age_after_preprocessing.jpg")
 #regularisierung mit Lasso
 ### Model 1: logistic regression ###
 
+# train model
+log_reg = LogisticRegression(max_iter=1000, random_state=2025)
+log_reg.fit(X_train_scaled, y_train)
+
+# predictions
+y_test_pred_log = log_reg.predict(X_test_scaled)
+y_test_predict_proba_log = log_reg.predict_proba(X_test_scaled)[:, 1]
+
+# confusion matrix and metrics
+cm_log = confusion_matrix(y_test, y_test_pred_log)
+tn_log, fp_log, fn_log, tp_log = cm_log.ravel()
+specificity_log = tn_log / (tn_log + fp_log)
+
+print("Confusion Matrix (Logistic Regression):\n", cm_log)
+print(f"Accuracy: {accuracy_score(y_test, y_test_pred_log):.3f}")
+print(f"Precision: {precision_score(y_test, y_test_pred_log):.3f}")
+print(f"Recall: {recall_score(y_test, y_test_pred_log):.3f}")
+print(f"Specificity: {specificity_log:.3f}")
+print(f"F1 Score: {f1_score(y_test, y_test_pred_log):.3f}")
+
+# ROC AUC
+fpr_log, tpr_log, _ = roc_curve(y_test, y_test_predict_proba_log)
+roc_auc_log = auc(fpr_log, tpr_log)
+print(f"ROC AUC: {roc_auc_log:.3f}")
+
+# create visualization folder
+os.makedirs("data_visualization", exist_ok=True)
+
+# ROC Curve
+plt.figure(figsize=(8,6))
+plt.plot(fpr_log, tpr_log, label=f'Logistic Regression (AUC = {roc_auc_log:.2f})')
+plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('ROC Curve - Logistic Regression')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("data_visualization/roc_logistic_regression.jpg")
+plt.close()
+
+# 1. Confusion Matrix Heatmap
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm_log, annot=True, fmt="d", cmap="Blues", cbar=False)
+plt.title("Confusion Matrix - Logistic Regression")
+plt.xlabel("Predicted Label")
+plt.ylabel("True Label")
+plt.tight_layout()
+plt.savefig("data_visualization/confusion_matrix_logistic_regression.jpg")
+plt.close()
+
+# 2. Feature Importance (Top 10 Coefficients)
+# Only possible if X_train_scaled is still a DataFrame
+if hasattr(X_train_scaled, 'columns'):
+    feature_names = X_train_scaled.columns
+    coef = pd.Series(log_reg.coef_[0], index=feature_names)
+    top_features = coef.abs().sort_values(ascending=False).head(10)
+
+    plt.figure(figsize=(10, 6))
+    top_features.sort_values().plot(kind="barh")
+    plt.title("Top 10 Influential Features - Logistic Regression")
+    plt.xlabel("Coefficient Magnitude")
+    plt.tight_layout()
+    plt.savefig("data_visualization/logistic_regression_top_features.jpg")
+    plt.close()
 
 
 
