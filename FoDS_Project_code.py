@@ -114,9 +114,37 @@ plt.savefig("data_visualization/age_after_preprocessing.jpg")
 
 
 ### Model 3: random forest ###
+rf = RandomForestClassifier(random_state = 2025)
+rf.fit(X_train, y_train)
 
+# Predictions
+y_test_pred = rf.predict(X_test)
+y_test_predict_proba = rf.predict_proba(X_test)[:, 1] 
 
+# Confusion matrix
+cm = confusion_matrix(y_test, y_test_pred)
+print("Confusion matrix:\n", cm)
 
+# Evaluation metrics
+accuracy = accuracy_score(y_test, y_test_pred)
+precision = precision_score(y_test, y_test_pred)
+recall = recall_score(y_test, y_test_pred)
+f1 = f1_score(y_test, y_test_pred)
+# Specificity (TN / (TN + FP)) 
+tn, fp, fn, tp = cm.ravel()
+specificity = tn / (tn + fp)
+
+# ROC AUC
+fp_rates, tp_rates, _ = roc_curve(y, y_test_predict_proba)
+roc_auc = auc(fp_rates, tp_rates)
+
+# Print the results
+print(f"Accuracy: {accuracy:.3f}")
+print(f"Precision: {precision:.3f}")
+print(f"Recall: {recall:.3f}")
+print(f"Specificity: {specificity:.3f}")
+print(f"F1 Score: {f1:.3f}")
+print(f"ROC AUC: {roc_auc:.3f}")
 
 ### Model 4: support vector machine ###
 
