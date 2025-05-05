@@ -8,6 +8,7 @@ from sklearn.metrics import (
     confusion_matrix, accuracy_score, precision_score, recall_score,
     f1_score, roc_curve, auc)
 import os
+from sklearn.ensemble import RandomForestClassifier  
 
 from sklearn.metrics import root_mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
@@ -209,6 +210,16 @@ specificity = tn / (tn + fp)
 # ROC AUC
 fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
 roc_auc = auc(fp_rates, tp_rates)
+
+# ROC curve
+plt.figure(figsize = (9, 6))
+plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], linestyle='--', color='red')
+plt.xlabel("FPR")  
+plt.ylabel("TPR")  
+plt.title("ROC curve for Random Forest model")  # Your solution here
+plt.tight_layout()
+plt.savefig('roc_curve_RF.png')
 
 # Print the results
 print(f"Accuracy: {accuracy:.3f}")
