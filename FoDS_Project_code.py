@@ -99,14 +99,14 @@ age_before = sns.histplot(data = X_train_unscaled, x = "Age", bins = 20)
 age_before.set_xlabel("Age")
 age_before.set_ylabel("Count")
 age_before.set_title("Age distribution before data preprocessing")
-plt.savefig("data_visualization/age_before_preprocessing.jpg")
+plt.savefig("age_before_preprocessing.jpg")
 
 plt.figure(figsize = (8,6))
 age_after = sns.histplot(data = X_train_scaled, x = "Age", bins = 20)
 age_after.set_xlabel("Age")
 age_after.set_ylabel("Count")
 age_after.set_title("Age distribution after data preprocessing")
-plt.savefig("data_visualization/age_after_preprocessing.jpg")
+plt.savefig("age_after_preprocessing.jpg")
 
 
 ########## Machine Learning Models #########
