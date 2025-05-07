@@ -92,7 +92,7 @@ get_scores(Lasso, X_train_scaled, y_train, X_test_scaled, y_test)
 print(Lasso.coef_)
 
 ### optional sampling ###
-
+"""
 ### Data visualization ###
 plt.figure(figsize = (8,6))
 age_before = sns.histplot(data = X_train_unscaled, x = "Age", bins = 20)
@@ -108,7 +108,7 @@ age_after.set_ylabel("Count")
 age_after.set_title("Age distribution after data preprocessing")
 plt.savefig("age_after_preprocessing.jpg")
 
-
+"""
 ########## Machine Learning Models #########
 #regularisierung mit Lasso
 ### Model 1: logistic regression ###
