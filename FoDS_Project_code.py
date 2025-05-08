@@ -34,7 +34,7 @@ data = pd.read_csv(
 
 ######### Methods ###########
 ##missing values
-print(data.isna().sum(axis=1).sum()) #output is 0, so we have no missing date --> no special handling needed
+print("Number of missing values:", data.isna().sum(axis=1).sum()) #output is 0, so we have no missing date --> no special handling needed
 
 ##changing label oral cancer from true/false to 1/0
 data["Oral Cancer (Diagnosis)"] = data["Oral Cancer (Diagnosis)"].map({"No": 0, "Yes": 1})
@@ -52,6 +52,11 @@ data_encoded = pd.get_dummies(data_, prefix=cate_cols, columns=cate_cols, dtype=
 ##construct features and labels
 y = data_["Oral Cancer (Diagnosis)"]
 X = data_encoded.drop(["Oral Cancer (Diagnosis)"], axis=1)
+
+##check for class-imbalance
+y.mean()
+y.sum()
+print('Data set comprises {:.0f} positive instances, implying a prevalence of oral cancer of {:.3f}'.format(y.sum(), y.mean()))
 
 ##train and test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=2025)
