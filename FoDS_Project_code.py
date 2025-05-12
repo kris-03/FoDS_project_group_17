@@ -17,6 +17,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import svm
 
+from sklearn.svm import LinearSVC
+from sklearn.calibration import CalibratedClassifierCV
+
+
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -78,7 +82,9 @@ X_train, X_test, y_train, y_test = (
     np.array(y_test),
 )
 
-## feature selection with Lasso --> alles 0, weil kein feature wichtig ist
+## feature selection with Lasso --> alles 0, weil kein feature wichtig ist --> nicht richtig gemacht, nochmals machen mit dem Tutorial von
+# Woche 10!!! --> hier werden nur die coef angeschaut und die feature selection nicht wirklich angewendet!
+
 def get_scores(model, X_train, y_train, X_test, y_test):
     y_pred_test = model.predict(X_test)
     y_pred_train = model.predict(X_train)
@@ -236,6 +242,11 @@ print(f"Specificity: {specificity:.3f}")
 print(f"F1 Score: {f1:.3f}")
 print(f"ROC AUC: {roc_auc:.3f}")
 
+
+
+
+
+"""
 ### Model 4: support vector machine ###
 #function for evaluation metrics
 clf_SVM = svm.SVC(probability=True, kernel = 'linear')
@@ -278,3 +289,52 @@ print(f"Recall: {recall:.3f}")
 print(f"Specificity: {specificity:.3f}")
 print(f"F1 Score: {f1:.3f}")
 print(f"ROC AUC: {roc_auc:.3f}")
+"""
+
+### Model 4: support vector machine ###
+#function for evaluation metrics
+base_svm = LinearSVC()
+clf_SVM = CalibratedClassifierCV(base_svm, cv=5)
+print("Starting calibrated LinearSVC training...")
+clf_SVM.fit(X_train, y_train)
+print("Finished training.")
+
+
+# Predictions
+y_test_pred = clf_SVM.predict(X_test)
+y_test_predict_proba = clf_SVM.predict_proba(X_test)[:, 1] 
+
+# Confusion matrix
+cm = confusion_matrix(y_test, y_test_pred)
+print("Confusion matrix: (Support Vector Machine)\n", cm)
+
+# Evaluation metrics
+accuracy = accuracy_score(y_test, y_test_pred)
+precision = precision_score(y_test, y_test_pred)
+recall = recall_score(y_test, y_test_pred)
+f1 = f1_score(y_test, y_test_pred)
+tn, fp, fn, tp = cm.ravel()
+specificity = tn / (tn + fp)
+
+# ROC AUC
+fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
+roc_auc = auc(fp_rates, tp_rates)
+
+# ROC curve
+plt.figure(figsize = (9, 6))
+plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], linestyle='--', color='red')
+plt.xlabel("FPR")  
+plt.ylabel("TPR")  
+plt.title("ROC curve for Support Vector Machine")  
+plt.tight_layout()
+plt.savefig('roc_curve_SVM.png')
+
+# Print the results
+print(f"Accuracy: {accuracy:.3f}")
+print(f"Precision: {precision:.3f}")
+print(f"Recall: {recall:.3f}")
+print(f"Specificity: {specificity:.3f}")
+print(f"F1 Score: {f1:.3f}")
+print(f"ROC AUC: {roc_auc:.3f}")
+
