@@ -19,8 +19,10 @@ from sklearn import svm
 
 from sklearn.svm import LinearSVC
 from sklearn.calibration import CalibratedClassifierCV
-
-
+from sklearn.linear_model import LassoCV
+from sklearn.svm import SVC
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import uniform
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -82,27 +84,18 @@ X_train, X_test, y_train, y_test = (
     np.array(y_test),
 )
 
-## feature selection with Lasso --> alles 0, weil kein feature wichtig ist --> nicht richtig gemacht, nochmals machen mit dem Tutorial von
-# Woche 10!!! --> hier werden nur die coef angeschaut und die feature selection nicht wirklich angewendet!
+## feature selection with Lasso --> alles 0, weil kein feature wichtig ist
+lasso_cv = LassoCV(cv=5, random_state=0)
+lasso_cv.fit(X_train_scaled, y_train)
 
-def get_scores(model, X_train, y_train, X_test, y_test):
-    y_pred_test = model.predict(X_test)
-    y_pred_train = model.predict(X_train)
-    # evaluation
-    r2_test = r2_score(y_test, y_pred_test)
-    rmse_test = root_mean_squared_error(y_test, y_pred_test)
+print("Optimal alpha:", lasso_cv.alpha_)
+print("Coefficients:", lasso_cv.coef_)
 
-    r2_train = r2_score(y_train, y_pred_train)
-    rmse_train = root_mean_squared_error(y_train, y_pred_train)
+selected_mask = lasso_cv.coef_ != 0
+selected_features = X_train_scaled.columns[selected_mask]
+X_train_selected = X_train_scaled[selected_features]
+X_test_selected = X_test_scaled[selected_features]
 
-    print('Training set score: R2 score: {:.3f}, RMSE: {:.3f}'.format(r2_train, rmse_train))
-    print('Test set score: R2 score: {:.3f}, RMSE: {:.3f}'.format(r2_test, rmse_test))
-
-Lasso = Lasso(alpha=0.1)
-Lasso.fit(X_train_scaled, y_train) 
-# get scores
-get_scores(Lasso, X_train_scaled, y_train, X_test_scaled, y_test)
-print(Lasso.coef_)
 
 ### optional sampling ###
 
@@ -246,15 +239,43 @@ print(f"ROC AUC: {roc_auc:.3f}")
 
 
 
-"""
+
 ### Model 4: support vector machine ###
+## Hyperparameter tuning for SVM ##
+"""
+svc = SVC()
+
+param_distributions = {'C': uniform(0.1, 100),'gamma': uniform(0.0001, 1),'kernel': ['rbf', 'linear']}
+random_search = RandomizedSearchCV(
+    estimator=svc,
+    param_distributions=param_distributions,
+    n_iter=20,          # Number of parameter settings to try
+    scoring='accuracy', 
+    cv=5,               
+    verbose=2,
+    random_state=42,
+    n_jobs=-1           # Use all available cores
+)
+
+random_search.fit(X_train_selected, y_train)
+
+print("Best parameters found: ", random_search.best_params_) #Best parameters found:  {'C': np.float64(37.55401188473625), 'gamma': np.float64(0.9508143064099162), 'kernel': 'rbf'}
+"""
+
+## Support Vector Machine Model ##
 #function for evaluation metrics
-clf_SVM = svm.SVC(probability=True, kernel = 'linear')
-clf_SVM.fit(X_train, y_train)
+clf_SVM = svm.SVC(
+    C=37.55401188473625,
+    gamma=0.9508143064099162,
+    kernel='rbf',
+    probability=True,
+    random_state=42)
+
+clf_SVM.fit(X_train_selected, y_train)
 
 # Predictions
-y_test_pred = clf_SVM.predict(X_test)
-y_test_predict_proba = clf_SVM.predict_proba(X_test)[:, 1] 
+y_test_pred = clf_SVM.predict(X_test_selected)
+y_test_predict_proba = clf_SVM.predict_proba(X_test_selected)[:, 1] 
 
 # Confusion matrix
 cm = confusion_matrix(y_test, y_test_pred)
@@ -289,52 +310,3 @@ print(f"Recall: {recall:.3f}")
 print(f"Specificity: {specificity:.3f}")
 print(f"F1 Score: {f1:.3f}")
 print(f"ROC AUC: {roc_auc:.3f}")
-"""
-
-### Model 4: support vector machine ###
-#function for evaluation metrics
-base_svm = LinearSVC()
-clf_SVM = CalibratedClassifierCV(base_svm, cv=5)
-print("Starting calibrated LinearSVC training...")
-clf_SVM.fit(X_train, y_train)
-print("Finished training.")
-
-
-# Predictions
-y_test_pred = clf_SVM.predict(X_test)
-y_test_predict_proba = clf_SVM.predict_proba(X_test)[:, 1] 
-
-# Confusion matrix
-cm = confusion_matrix(y_test, y_test_pred)
-print("Confusion matrix: (Support Vector Machine)\n", cm)
-
-# Evaluation metrics
-accuracy = accuracy_score(y_test, y_test_pred)
-precision = precision_score(y_test, y_test_pred)
-recall = recall_score(y_test, y_test_pred)
-f1 = f1_score(y_test, y_test_pred)
-tn, fp, fn, tp = cm.ravel()
-specificity = tn / (tn + fp)
-
-# ROC AUC
-fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
-roc_auc = auc(fp_rates, tp_rates)
-
-# ROC curve
-plt.figure(figsize = (9, 6))
-plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
-plt.plot([0, 1], [0, 1], linestyle='--', color='red')
-plt.xlabel("FPR")  
-plt.ylabel("TPR")  
-plt.title("ROC curve for Support Vector Machine")  
-plt.tight_layout()
-plt.savefig('roc_curve_SVM.png')
-
-# Print the results
-print(f"Accuracy: {accuracy:.3f}")
-print(f"Precision: {precision:.3f}")
-print(f"Recall: {recall:.3f}")
-print(f"Specificity: {specificity:.3f}")
-print(f"F1 Score: {f1:.3f}")
-print(f"ROC AUC: {roc_auc:.3f}")
-
