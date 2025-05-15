@@ -24,6 +24,8 @@ from sklearn.svm import SVC
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
 
+from sklearn import tree
+
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -188,7 +190,71 @@ if hasattr(X_train_scaled, 'columns'):
 
 
 ### Model 2: decision tree ###
+print("######### DECISION TREE #########")
+dt = tree.DecisionTreeClassifier(random_state=2025)
+dt.fit(X_train_selected, y_train)
 
+#Predictions
+y_test_pred = dt.predict(X_test_selected)
+y_test_predict_proba = dt.predict_proba(X_test_selected)[:, 1] 
+
+#confusion matrix
+cm = confusion_matrix(y_test, y_test_pred)
+print("Confusion matrix:\n", cm)
+
+# Evaluation metrics
+accuracy = accuracy_score(y_test, y_test_pred)
+precision = precision_score(y_test, y_test_pred)
+recall = recall_score(y_test, y_test_pred)
+f1 = f1_score(y_test, y_test_pred)
+tn, fp, fn, tp = cm.ravel()
+specificity = tn / (tn + fp)
+
+# ROC AUC
+fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
+roc_auc = auc(fp_rates, tp_rates)
+
+# ROC curve
+plt.figure(figsize = (9, 6))
+plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
+plt.plot([0, 1], [0, 1], linestyle='--', color='red')
+plt.xlabel("FPR")  
+plt.ylabel("TPR")  
+plt.title("ROC curve for Decision Tree model")  # Your solution here
+plt.tight_layout()
+plt.savefig('roc_curve_DT.png')
+
+# Print the results
+print(f"Accuracy: {accuracy:.3f}")
+print(f"Precision: {precision:.3f}")
+print(f"Recall: {recall:.3f}")
+print(f"Specificity: {specificity:.3f}")
+print(f"F1 Score: {f1:.3f}")
+print(f"ROC AUC: {roc_auc:.3f}")
+
+#plot decision tree
+plt.figure(figsize=(20,10))
+tree.plot_tree(dt, filled=True)
+plt.savefig('decision tree.png')
+
+"""
+print("######### DECISION TREE (NO PRESELECTION) #########")
+t = tree.DecisionTreeClassifier(random_state=2025)
+dt.fit(X_train, y_train)
+
+#Predictions
+y_test_pred = dt.predict(X_test)
+y_test_predict_proba = dt.predict_proba(X_test)[:, 1] 
+
+#confusion matrix
+cm = confusion_matrix(y_test, y_test_pred)
+print("Confusion matrix:\n", cm)
+
+#plot decision tree
+plt.figure(figsize=(20,10))
+tree.plot_tree(dt, filled=True)
+plt.savefig('decision tree.png')
+"""
 
 
 
