@@ -97,6 +97,7 @@ selected_mask = lasso_cv.coef_ != 0
 selected_features = X_train_scaled.columns[selected_mask]
 X_train_selected = X_train_scaled[selected_features]
 X_test_selected = X_test_scaled[selected_features]
+print(selected_features)
 
 
 ### optional sampling ###
@@ -117,6 +118,8 @@ age_after.set_title("Age distribution after data preprocessing")
 plt.savefig("age_after_preprocessing.jpg")
 
 
+print("")
+print("")
 ########## Machine Learning Models #########
 #regularisierung mit Lasso
 ### Model 1: logistic regression ###
@@ -189,6 +192,8 @@ if hasattr(X_train_scaled, 'columns'):
 
 
 
+print("")
+print("")
 ### Model 2: decision tree ###
 print("######### DECISION TREE #########")
 dt = tree.DecisionTreeClassifier(random_state=2025)
@@ -237,7 +242,9 @@ plt.figure(figsize=(20,10))
 tree.plot_tree(dt, filled=True)
 plt.savefig('decision tree.png')
 
-"""
+
+print("")
+print("")
 print("######### DECISION TREE (NO PRESELECTION) #########")
 t = tree.DecisionTreeClassifier(random_state=2025)
 dt.fit(X_train, y_train)
@@ -254,11 +261,11 @@ print("Confusion matrix:\n", cm)
 plt.figure(figsize=(20,10))
 tree.plot_tree(dt, filled=True)
 plt.savefig('decision tree.png')
-"""
 
 
-
-### Model 3: random forest ###
+print("")
+print("")
+print("### Model 3: random forest ###")
 rf = RandomForestClassifier(random_state = 2025)
 rf.fit(X_train, y_train)
 
@@ -304,11 +311,11 @@ print(f"ROC AUC: {roc_auc:.3f}")
 
 
 
+print("")
+print("")
+print("### Model 4: support vector machine ###")
+print("## Hyperparameter tuning for SVM ##")
 
-
-### Model 4: support vector machine ###
-## Hyperparameter tuning for SVM ##
-"""
 svc = SVC()
 
 param_distributions = {'C': uniform(0.1, 100),'gamma': uniform(0.0001, 1),'kernel': ['rbf', 'linear']}
@@ -326,8 +333,9 @@ random_search = RandomizedSearchCV(
 random_search.fit(X_train_selected, y_train)
 
 print("Best parameters found: ", random_search.best_params_) #Best parameters found:  {'C': np.float64(37.55401188473625), 'gamma': np.float64(0.9508143064099162), 'kernel': 'rbf'}
-"""
 
+print("")
+print("## SVM Model ##")
 ## Support Vector Machine Model ##
 #function for evaluation metrics
 clf_SVM = svm.SVC(
