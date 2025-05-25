@@ -153,17 +153,16 @@ print(f"ROC AUC: {roc_auc_log:.3f}")
 os.makedirs("data_visualization", exist_ok=True)
 
 # ROC Curve
-plt.figure(figsize=(8,6))
+plt.figure(figsize=(6, 4))
 plt.plot(fpr_log, tpr_log, label=f'Logistic Regression (AUC = {roc_auc_log:.2f})')
-plt.plot([0, 1], [0, 1], linestyle='--', color='gray')
-plt.xlabel('False Positive Rate')
-plt.ylabel('True Positive Rate')
+plt.plot([0, 1], [0, 1], linestyle='--', color='red')
+plt.xlabel('FPR')
+plt.ylabel('TPR')
 plt.title('ROC Curve - Logistic Regression')
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig("data_visualization/roc_logistic_regression.jpg")
-plt.close()
+plt.savefig("data_visualization/roc_curve_LR.jpg")
 
 # 1. Confusion Matrix Heatmap
 plt.figure(figsize=(6, 5))
@@ -220,14 +219,16 @@ fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
 roc_auc = auc(fp_rates, tp_rates)
 
 # ROC curve
-plt.figure(figsize = (9, 6))
-plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
+plt.figure(figsize = (6, 4))
+plt.plot(fp_rates, tp_rates, label=f'Decision Tree (AUC = {roc_auc:.2f})')
 plt.plot([0, 1], [0, 1], linestyle='--', color='red')
 plt.xlabel("FPR")  
 plt.ylabel("TPR")  
-plt.title("ROC curve for Decision Tree model")  # Your solution here
+plt.title("ROC Curve - Decision Tree")  
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
-plt.savefig('roc_curve_DT.png')
+plt.savefig('data_visualization/roc_curve_DT.png')
 
 # Print the results
 print(f"Accuracy: {accuracy:.3f}")
@@ -291,14 +292,16 @@ fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
 roc_auc = auc(fp_rates, tp_rates)
 
 # ROC curve
-plt.figure(figsize = (9, 6))
-plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
+plt.figure(figsize = (6, 4))
+plt.plot(fp_rates, tp_rates, label=f'Random Forest (AUC = {roc_auc:.2f})')
 plt.plot([0, 1], [0, 1], linestyle='--', color='red')
 plt.xlabel("FPR")  
 plt.ylabel("TPR")  
-plt.title("ROC curve for Random Forest model")  # Your solution here
+plt.title("ROC Curve - Random Forest")  
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
-plt.savefig('roc_curve_RF.png')
+plt.savefig('data_visualization/roc_curve_RF.png')
 
 # Print the results
 print(f"Accuracy: {accuracy:.3f}")
@@ -368,14 +371,16 @@ fp_rates, tp_rates, _ = roc_curve(y_test, y_test_predict_proba)
 roc_auc = auc(fp_rates, tp_rates)
 
 # ROC curve
-plt.figure(figsize = (9, 6))
-plt.plot(fp_rates, tp_rates, label=f'ROC curve AUC = {roc_auc:.2f})')
+plt.figure(figsize = (6, 4))
+plt.plot(fp_rates, tp_rates, label=f'Support Vector Machine = {roc_auc:.2f})')
 plt.plot([0, 1], [0, 1], linestyle='--', color='red')
 plt.xlabel("FPR")  
 plt.ylabel("TPR")  
-plt.title("ROC curve for Support Vector Machine")  
+plt.title("ROC Curve - Support Vector Machine")  
+plt.legend()
+plt.grid(True)
 plt.tight_layout()
-plt.savefig('roc_curve_SVM.png')
+plt.savefig('data_visualization/roc_curve_SVM.png')
 
 # Print the results
 print(f"Accuracy: {accuracy:.3f}")
