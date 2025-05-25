@@ -48,7 +48,7 @@ print("Number of missing values:", data.isna().sum(axis=1).sum()) #output is 0, 
 data["Oral Cancer (Diagnosis)"] = data["Oral Cancer (Diagnosis)"].map({"No": 0, "Yes": 1})
 
 ##first dropping all columns giving a hint to the outcome
-data_ = data.drop(["Early Diagnosis", "Treatment Type", "Cancer Stage", "Survival Rate (5-Year, %)", "Cost of Treatment (USD)", "Economic Burden (Lost Workdays per Year)" , "Tumor Size (cm)"], axis=1)
+data_ = data.drop(["ID", "Early Diagnosis", "Treatment Type", "Cancer Stage", "Survival Rate (5-Year, %)", "Cost of Treatment (USD)", "Economic Burden (Lost Workdays per Year)" , "Tumor Size (cm)"], axis=1)
 #print(data_.columns)
 
 ##one-hot-encoding
