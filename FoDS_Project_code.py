@@ -11,7 +11,7 @@ import os
 from sklearn.ensemble import RandomForestClassifier  
 
 from sklearn.metrics import root_mean_squared_error, r2_score
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -23,6 +23,12 @@ from sklearn.linear_model import LassoCV
 from sklearn.svm import SVC
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
+
+from sklearn.feature_selection import SelectFromModel
+from sklearn.feature_selection import SelectKBest, chi2
+
+
+
 
 from sklearn import tree
 
@@ -71,7 +77,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 X_train_unscaled = X_train
 
 ##standardization
-sc = StandardScaler()
+sc = MinMaxScaler() #StandardScaler()
 num_cols_new = num_cols.drop(["Oral Cancer (Diagnosis)"])
 
 X_train_scaled, X_test_scaled = X_train.copy(), X_test.copy()
@@ -85,8 +91,8 @@ X_train, X_test, y_train, y_test = (
     np.array(y_train),
     np.array(y_test),
 )
-
-## feature selection with Lasso --> alles 0, weil kein feature wichtig ist
+"""
+## feature selection with Lasso
 lasso_cv = LassoCV(cv=5, random_state=0)
 lasso_cv.fit(X_train_scaled, y_train)
 
@@ -98,9 +104,52 @@ selected_features = X_train_scaled.columns[selected_mask]
 X_train_selected = X_train_scaled[selected_features]
 X_test_selected = X_test_scaled[selected_features]
 print(selected_features)
+"""
+## feature selection with Univariate FS
+UVFS_Selector = SelectKBest(chi2, k=5) # Select top 4 features
+X_UVFS = UVFS_Selector.fit_transform(X_train_scaled, y_train) # ...but only on training data.
+X_UVFS_test = UVFS_Selector.transform(X_test)
+scores = -np.log10(UVFS_Selector.pvalues_)
+scores /= scores.max()
+
+# Plot 
+X_indices = np.arange(X.shape[-1])
+plt.figure()
+plt.clf()
+plt.bar(X_indices - 0.05, scores, width=0.2)
+plt.title("Feature univariate score")
+plt.xlabel("Feature")
+plt.ylabel(r"Univariate score ($-Log(p_{value})$)")
+plt.xticks(X_indices, X.columns, rotation = 90)
+plt.tight_layout()
+plt.savefig("Univariate score of features")
 
 
-### optional sampling ###
+mask = UVFS_Selector.get_support()
+all_feature_names = X.columns
+p_values = UVFS_Selector.pvalues_
+selected_features = [(name, pval) for name, pval, selected in zip(all_feature_names, p_values, mask) if selected]
+# Print features and their p-values
+print("Selected Features and Their p-values (Top 5 by chi-squared test):")
+for name, pval in selected_features:
+    print(f"{name}: p-value = {pval:.4e}")
+#constructed selected X_train
+X_train_selected = X_train_unscaled.loc[:, mask]
+print(X_train_selected)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ### Data visualization ###
 plt.figure(figsize = (8,6))
