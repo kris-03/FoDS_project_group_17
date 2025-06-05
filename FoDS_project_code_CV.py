@@ -13,6 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.metrics import root_mean_squared_error, r2_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LinearRegression, Ridge, Lasso
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -27,6 +28,7 @@ from scipy.stats import uniform
 
 from sklearn import tree
 from sklearn.model_selection import GridSearchCV
+from sklearn.feature_selection import SelectKBest, chi2
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -127,13 +129,54 @@ for train_index, test_index in skf.split(X, y):
     y_test  = y.iloc[test_index]  # Your solution here
     X_train = X.iloc[train_index]  # Your solution here
     y_train = y.iloc[train_index]  # Your solution here
-
-    # Standardize the numerical features using training set statistics
-    sc = StandardScaler()
+    
+    ## standardization
+    sc = MinMaxScaler() 
     X_train_scaled, X_test_scaled = X_train.copy(), X_test.copy()
     X_train_scaled[num_cols_new] = sc.fit_transform(X_train[num_cols_new])
     X_test_scaled[num_cols_new] = sc.transform(X_test[num_cols_new])
 
+    ## feature selection with Univariate FS
+    UVFS_Selector = SelectKBest(chi2, k=5) # Select top 4 features
+    X_UVFS = UVFS_Selector.fit_transform(X_train_scaled, y_train) # ...but only on training data.
+    X_UVFS_test = UVFS_Selector.transform(X_test)
+    scores = -np.log10(UVFS_Selector.pvalues_)
+    scores /= scores.max()
+
+    # Plot 
+    X_indices = np.arange(X.shape[-1])
+    plt.figure()
+    plt.clf()
+    plt.bar(X_indices - 0.05, scores, width=0.2)
+    plt.title("Feature univariate score")
+    plt.xlabel("Feature")
+    plt.ylabel(r"Univariate score ($-Log(p_{value})$)")
+    plt.xticks(X_indices, X.columns, rotation = 90)
+    plt.tight_layout()
+    plt.savefig(f"UVFS_scores_fold_{fold}.png")
+
+    mask = UVFS_Selector.get_support()
+    all_feature_names = X.columns
+    p_values = UVFS_Selector.pvalues_
+    selected_features = [(name, pval) for name, pval, selected in zip(all_feature_names, p_values, mask) if selected]
+    # Print features and their p-values
+    print("Selected Features and Their p-values (Top 5 by chi-squared test):")
+    for name, pval in selected_features:
+        print(f"{name}: p-value = {pval:.4e}")
+    #constructed selected X_train
+    #selected_feature_names = all_feature_names[mask]
+    #X_train_selected = X_train[selected_feature_names]
+    #X_test_selected = X_test[selected_feature_names]
+    #X_train_scaled_selected = X_train_scaled[selected_feature_names]
+    #X_test_scaled_selected = X_test_scaled[selected_feature_names]
+
+    X_train_selected = X_train.loc[:, mask] # For DT and RF
+    X_test_selected = X_test.loc[:, mask]
+    X_train_scaled_selected = X_train_scaled.loc[:, mask] # For LR and SVM
+    X_test_scaled_selected = X_test_scaled.loc[:, mask]
+    print(X_train_selected)
+
+    
     # Creat prediction models and fit them to the training data
      
     ### Model 1: logistic regression ###
@@ -157,7 +200,7 @@ for train_index, test_index in skf.split(X, y):
     # ROC AUC
     fp_rates_LR, tp_rates_LR, _ = roc_curve(y_test, y_test_predict_proba_LR)
     roc_auc_LR = auc(fp_rates_LR, tp_rates_LR)
-    ax_LR.plot(fp_rates_LR, tp_rates_LR, label=f'Logistic Regression (AUC = {roc_auc_LR:.2f})')
+    ax_LR.plot(fp_rates_LR, tp_rates_LR, label=f'Fold {fold} (AUC = {roc_auc_LR:.2f})')
     
     ### Model 2: decision tree ###
     clf_DT = tree.DecisionTreeClassifier(random_state=2025)
@@ -177,12 +220,12 @@ for train_index, test_index in skf.split(X, y):
     # ROC AUC
     fp_rates_DT, tp_rates_DT, _ = roc_curve(y_test, y_test_predict_proba_DT)
     roc_auc_DT = auc(fp_rates_DT, tp_rates_DT)
-    ax_DT.plot(fp_rates_DT, tp_rates_DT, label=f'Decision Tree (AUC = {roc_auc_DT:.2f})')
+    ax_DT.plot(fp_rates_DT, tp_rates_DT, label=f'Fold {fold} (AUC = {roc_auc_DT:.2f})')
     
     ### Model 3: random forest ###
     # Hyperparameter tuning
     param_grid = {'n_estimators': [50, 100], 'max_depth': [None, 10, 20], 'max_features': ['sqrt', 'log2']}
-    grid_RF = GridSearchCV(RandomForestClassifier(random_state=2025), param_grid, cv=5, scoring='roc_auc', n_jobs=-1)
+    grid_RF = GridSearchCV(RandomForestClassifier(random_state=2025), param_grid, cv=5, scoring='accuracy', n_jobs=-1)
     grid_RF.fit(X_train, y_train) # No feature scaling for random forest
 
     # Best model
@@ -204,12 +247,15 @@ for train_index, test_index in skf.split(X, y):
     # ROC AUC
     fp_rates_RF, tp_rates_RF, _ = roc_curve(y_test, y_test_predict_proba_RF)
     roc_auc_RF = auc(fp_rates_RF, tp_rates_RF)
-    ax_RF.plot(fp_rates_RF, tp_rates_RF)
+    ax_RF.plot(fp_rates_RF, tp_rates_RF, label=f'Fold {fold} (AUC = {roc_auc_RF:.2f})')
     
     ### Model 4: support vector machine ###
     # Hyperparameter tuning
     svc = SVC(probability=True)
-    param_distributions = {'C': uniform(0.1, 100), 'gamma': uniform(0.0001, 1), 'kernel': ['rbf', 'linear']}
+    param_distributions = [
+        {'kernel': ['linear'], 'C': uniform(0.1, 100)},
+        {'kernel': ['rbf'], 'C': uniform(0.1, 100), 'gamma': uniform(0.0001, 1)}]
+    #param_distributions = {'C': uniform(0.1, 100), 'gamma': uniform(0.0001, 1), 'kernel': ['rbf', 'linear']}    
     random_search = RandomizedSearchCV(
         estimator=svc,
         param_distributions=param_distributions,
@@ -241,7 +287,7 @@ for train_index, test_index in skf.split(X, y):
     # ROC AUC
     fp_rates_SVM, tp_rates_SVM, _ = roc_curve(y_test, y_test_predict_proba_SVM)
     roc_auc_SVM = auc(fp_rates_SVM, tp_rates_SVM)
-    ax_SVM.plot(fp_rates_SVM, tp_rates_SVM, label=f'Support Vector Machine (AUC = {roc_auc_SVM:.2f})')
+    ax_SVM.plot(fp_rates_SVM, tp_rates_SVM, label=f'Fold {fold} (AUC = {roc_auc_SVM:.2f})')
     
     # Save the performance metrics in the data frame
     df_performance.loc[len(df_performance),:] = [fold, 'LR', accuracy_LR, precision_LR, recall_LR, specificity_LR, roc_auc_LR]
@@ -268,16 +314,19 @@ print(mean_std_df_LR_DT)
 print(mean_std_df_RF_SVM)
 
 # Finishnig and saving the ROC curves
+ax_LR.legend()
 fig_LR.tight_layout()
 fig_LR.savefig('roc_curve_LR.png')
 
+ax_DT.legend()
 fig_DT.tight_layout()
 fig_DT.savefig('roc_curve_DT.png')
 
+ax_RF.legend()
 fig_RF.tight_layout()
 fig_RF.savefig('roc_curve_RF.png')
 
+ax_SVM.legend()
 fig_SVM.tight_layout()
 fig_SVM.savefig('roc_curve_SVM.png')
-
 
