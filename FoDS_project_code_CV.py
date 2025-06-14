@@ -137,8 +137,8 @@ for train_index, test_index in skf.split(X, y):
     X_test_scaled[num_cols_new] = sc.transform(X_test[num_cols_new])
 
     ## feature selection with Univariate FS
-    UVFS_Selector = SelectKBest(chi2, k=5) # Select top 4 features
-    X_UVFS = UVFS_Selector.fit_transform(X_train_scaled, y_train) # ...but only on training data.
+    UVFS_Selector = SelectKBest(chi2, k=5) 
+    X_UVFS = UVFS_Selector.fit_transform(X_train_scaled, y_train) 
     X_UVFS_test = UVFS_Selector.transform(X_test)
     scores = -np.log10(UVFS_Selector.pvalues_)
     scores /= scores.max()
