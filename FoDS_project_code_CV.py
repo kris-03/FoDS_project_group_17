@@ -139,7 +139,7 @@ for train_index, test_index in skf.split(X, y):
     plt.ylabel(r"Univariate score ($-Log(p_{value})$)")
     plt.xticks(X_indices, X.columns, rotation = 90)
     plt.tight_layout()
-    plt.savefig(f"data_visualization\UVFS_scores_fold_{fold}.png")
+    plt.savefig(f"data_visualization/UVFS_scores_fold_{fold}.png")
 
     mask = UVFS_Selector.get_support()
     all_feature_names = X.columns
@@ -388,19 +388,19 @@ print(mean_std_df_RF_all)
 # Finishnig and saving the ROC curves
 ax_LR.legend()
 fig_LR.tight_layout()
-fig_LR.savefig('data_visualization\roc_curve_LR.png')
+fig_LR.savefig('data_visualization/roc_curve_LR.png')
 
 ax_DT.legend()
 fig_DT.tight_layout()
-fig_DT.savefig('data_visualization\roc_curve_DT.png')
+fig_DT.savefig('data_visualization/roc_curve_DT.png')
 
 ax_RF.legend()
 fig_RF.tight_layout()
-fig_RF.savefig('data_visualization\roc_curve_RF.png')
+fig_RF.savefig('data_visualization/roc_curve_RF.png')
 
 ax_SVM.legend()
 fig_SVM.tight_layout()
-fig_SVM.savefig('data_visualization\roc_curve_SVM.png')
+fig_SVM.savefig('data_visualization/roc_curve_SVM.png')
 
 # Plot of top 10 most influential features
 
@@ -422,14 +422,14 @@ top10['mean'].sort_values().plot(kind = 'barh')
 plt.title('Top 10 Influential Features - Logistic Regression')
 plt.xlabel('Mean Coefficient')
 plt.tight_layout()
-plt.savefig('data_visualization\LR_feature_coefficients.jpg')
+plt.savefig('data_visualization/LR_feature_coefficients.jpg')
 
 plt.figure(figsize = (10, 6))
 top_features.sort_values().plot(kind = 'barh')
 plt.title('Top 10 Influential Features - Decision Tree')
 plt.xlabel('Mean Feature Importance')
 plt.tight_layout()
-plt.savefig('data_visualization\DT_feature_importance.jpg')
+plt.savefig('data_visualization/DT_feature_importance.jpg')
 plt.show()
 
 plt.figure(figsize = (10, 6))
@@ -437,5 +437,5 @@ top_features.sort_values().plot(kind = 'barh')
 plt.title('Top 10 Influential Features - Random Forest')
 plt.xlabel('Mean Feature Importance')
 plt.tight_layout()
-plt.savefig('data_visualization\RF_feature_importance.jpg')
+plt.savefig('data_visualization/RF_feature_importance.jpg')
 plt.show()
