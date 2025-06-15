@@ -1,37 +1,22 @@
 import pandas as pd
 import numpy as np
-import seaborn as sns
-from sklearn.model_selection import train_test_split, KFold
 from sklearn.model_selection import StratifiedKFold  
-
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import (
-    confusion_matrix, accuracy_score, precision_score, recall_score,
-    f1_score, roc_curve, auc)
+    confusion_matrix, accuracy_score, precision_score, recall_score, roc_curve, auc)
 import os
 from sklearn.ensemble import RandomForestClassifier  
-
-from sklearn.metrics import root_mean_squared_error, r2_score
-from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
 import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn import svm
-
-from sklearn.svm import LinearSVC
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.linear_model import LassoCV
 from sklearn.svm import SVC
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import uniform
-
 from sklearn import tree
 from sklearn.model_selection import GridSearchCV
 from sklearn.feature_selection import SelectKBest, chi2
-
 import warnings
 warnings.filterwarnings("ignore")
+
 
 # Loading the data
 data = pd.read_csv(
