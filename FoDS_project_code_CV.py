@@ -64,28 +64,28 @@ fig_LR, ax_LR = plt.subplots(figsize = (6, 4))
 ax_LR.plot([0, 1], [0, 1], linestyle = '--', color='red')
 ax_LR.set_xlabel("FPR")  
 ax_LR.set_ylabel("TPR")  
-ax_LR.set_title("ROC Curve - Logistic Regression")  
+ax_LR.set_title("ROC Curve - Logistic Regression with feature selection")  
 ax_LR.grid(True)
 
 fig_DT, ax_DT = plt.subplots(figsize = (6, 4))
 ax_DT.plot([0, 1], [0, 1], linestyle = '--', color='red')
 ax_DT.set_xlabel("FPR")  
 ax_DT.set_ylabel("TPR")  
-ax_DT.set_title("ROC Curve - Decision Tree")  
+ax_DT.set_title("ROC Curve - Decision Tree with feature selection")  
 ax_DT.grid(True)
 
 fig_RF, ax_RF = plt.subplots(figsize = (6, 4))
 ax_RF.plot([0, 1], [0, 1], linestyle = '--', color='red')
 ax_RF.set_xlabel("FPR")  
 ax_RF.set_ylabel("TPR")  
-ax_RF.set_title("ROC Curve - Random Forest")  
+ax_RF.set_title("ROC Curve - Random Forest with feature selection")  
 ax_RF.grid(True)
 
 fig_SVM, ax_SVM = plt.subplots(figsize = (6, 4))
 ax_SVM.plot([0, 1], [0, 1], linestyle = '--', color='red')
 ax_SVM.set_xlabel("FPR")  
 ax_SVM.set_ylabel("TPR")  
-ax_SVM.set_title("ROC Curve - Support Vector Machine") 
+ax_SVM.set_title("ROC Curve - Support Vector Machine with feature selection") 
 ax_SVM.grid(True)
 
 
@@ -160,7 +160,7 @@ for train_index, test_index in skf.split(X, y):
      
     ### Model 1: logistic regression ###
     clf_LR = LogisticRegression(max_iter = 1000, random_state = 42)
-    clf_LR_all = clf_LR
+    clf_LR_all = LogisticRegression(max_iter = 1000, random_state = 42)
 
     # Logistic regression with feature selection
     clf_LR.fit(X_train_scaled_selected, y_train)
@@ -208,7 +208,7 @@ for train_index, test_index in skf.split(X, y):
 
     ### Model 2: decision tree ###
     clf_DT = tree.DecisionTreeClassifier(random_state = 42)
-    clf_DT_all = clf_DT
+    clf_DT_all = tree.DecisionTreeClassifier(random_state = 42)
     
     # Decision Tree with feature selection
     clf_DT.fit(X_train_selected, y_train)
@@ -263,7 +263,7 @@ for train_index, test_index in skf.split(X, y):
                   'criterion': ['gini', 'entropy']
                   }
     grid_RF = GridSearchCV(RandomForestClassifier(random_state = 42), param_grid, cv = 3, scoring = 'accuracy', n_jobs = -1)
-    grid_RF_all = grid_RF
+    grid_RF_all = GridSearchCV(RandomForestClassifier(random_state = 42), param_grid, cv = 3, scoring = 'accuracy', n_jobs = -1)
     
     # Random forest with feature selection
     grid_RF.fit(X_train_selected, y_train) # No feature scaling for random forest
@@ -288,8 +288,8 @@ for train_index, test_index in skf.split(X, y):
 
     # Random forest without feature selection
     grid_RF_all.fit(X_train, y_train) # No feature scaling for random forest
-    print("Best Parameters for Random Forest without feature selection:", grid_RF.best_params_)
-    clf_RF_all = grid_RF.best_estimator_
+    print("Best Parameters for Random Forest without feature selection:", grid_RF_all.best_params_)
+    clf_RF_all = grid_RF_all.best_estimator_
     # Predictions
     y_test_pred_RF_all = clf_RF_all.predict(X_test)
     y_test_predict_proba_RF_all = clf_RF_all.predict_proba(X_test)[:, 1] 
