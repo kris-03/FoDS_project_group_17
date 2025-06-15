@@ -198,7 +198,7 @@ for train_index, test_index in skf.split(X, y):
     fp_rates_LR_all, tp_rates_LR_all, _ = roc_curve(y_test, y_test_predict_proba_LR_all)
     roc_auc_LR_all = auc(fp_rates_LR_all, tp_rates_LR_all)
     # Feature coefficients
-    df_this_LR_coef = pd.DataFrame({'feature': X_train_scaled.columns, 'coef': clf_LR.coef_[0]})
+    df_this_LR_coef = pd.DataFrame({'feature': X_train_scaled.columns, 'coef': clf_LR_all.coef_[0]})
     df_this_LR_coef['fold'] = fold
     feature_coefficient_LR.append(df_this_LR_coef)   
     
